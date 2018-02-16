@@ -1,0 +1,23 @@
+##
+# Copyright (c) Romain Cottard
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code.
+##
+
+# Routing file
+
+all:
+  # -- HOME ROUTING --
+  home:
+    route: /
+    controller: \Eureka\Package\Core\Controller\Home::index
+
+
+  page404:
+    route: /page404
+    controller: \Eureka\Package\Core\Controller\Error::page404
+
+  page500:
+    route: /page500
+    controller: \Eureka\Package\Core\Controller\Error::page500

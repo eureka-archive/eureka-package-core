@@ -1,0 +1,18 @@
+{% extends '@template/Content/PageHome.twig' %}
+
+{% use '@template/Header/Navbar.twig' %}
+{% use '@template/Footer/Footer.twig' %}
+
+{% block header_navbar_name %}{{ meta.title }}{% endblock %}
+
+{% block content %}
+
+    <h1>Internal Error (500)!</h1>
+
+    <h2>Exception: {{ exception.getMessage() }}</h2>
+    <h3>Trace:</h3>
+    <pre>{{ exception.getTraceAsString() }}</pre>
+{% endblock %}
+
+{% block side_right %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{
+  "name": "eureka/eureka-package-core",
+  "description": "Common package home for Eureka Framework",
+  "type": "library",
+  "license": "MIT",
+
+  "authors": [
+    {
+      "name": "Romain Cottard",
+      "role": "Developer"
+    }
+
+  ],
+
+  "autoload": {
+    "psr-4": {
+      "Eureka\\Package\\Core\\Component": "./src/components",
+      "Eureka\\Package\\Core\\Controller": "./src/controllers",
+    }
+  },
+
+  "require": {
+  }
+
+}
