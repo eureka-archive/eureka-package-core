@@ -29,6 +29,12 @@ class CoreController extends KernelController
     /** @var \Twig_Loader_Filesystem $twigLoader */
     private $twigLoader = null;
 
+    /** @var callable[] $twigFunctions */
+    private $twigFunctions = [];
+
+    /** @var callable[] $twigFilters */
+    private $twigFilters = [];
+
     /**
      * CoreController constructor.
      *
@@ -37,6 +43,8 @@ class CoreController extends KernelController
      * @param \Eureka\Component\Routing\RouteInterface $route
      * @param \Psr\Http\Message\ServerRequestInterface|null $request
      * @throws \Twig_Error_Loader
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     public function __construct(ContainerInterface $container, Config $config, RouteInterface $route, ServerRequestInterface $request = null)
     {
@@ -53,6 +61,8 @@ class CoreController extends KernelController
     /**
      * @return $this
      * @throws \Twig_Error_Loader
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     private function initTwig()
     {
@@ -75,6 +85,8 @@ class CoreController extends KernelController
 
     /**
      * @return $this
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     protected function initMenu()
     {
@@ -91,15 +103,15 @@ class CoreController extends KernelController
 
             if (!empty($data['submenu'])) {
                 $submenu = new Menu();
-                foreach ($data['submenu'] as $subdata) {
-                    $subitem = new MenuItem($subdata['label']);
-                    $subitem
-                        ->setIsDivider((bool) Helper::issetget($subdata['divider'], false))
-                        ->setUri($this->getRoute(Helper::issetget($subdata['route'], '#'))->getUri())
-                        ->setIcon(Helper::issetget($subdata['icon']))
+                foreach ($data['submenu'] as $subData) {
+                    $subItem = new MenuItem($subData['label']);
+                    $subItem
+                        ->setIsDivider((bool) Helper::issetget($subData['divider'], false))
+                        ->setUri($this->getRoute(Helper::issetget($subData['route'], '#'))->getUri())
+                        ->setIcon(Helper::issetget($subData['icon']))
                         ->setIsActive(true)
                     ;
-                    $submenu->add($subitem);
+                    $submenu->add($subItem);
                 }
                 $item->setSubmenu($submenu);
             }
@@ -137,12 +149,38 @@ class CoreController extends KernelController
     }
 
     /**
+     * @param  string $name
+     * @param  callable $callable
+     * @return $this
+     */
+    protected function addTwigFunction($name, callable $callable)
+    {
+        $this->twigFunctions[$name] = $callable;
+
+        return $this;
+    }
+
+    /**
+     * @param  string $name
+     * @param  callable $callable
+     * @return $this
+     */
+    protected function addTwigFilter($name, callable $callable)
+    {
+        $this->twigFilters[$name] = $callable;
+
+        return $this;
+    }
+
+    /**
      * @param  string $template
      * @param  array $context
      * @return string
      * @throws \Twig_Error_Loader
      * @throws \Twig_Error_Runtime
      * @throws \Twig_Error_Syntax
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     protected function render($template, $context = [])
     {
@@ -153,6 +191,16 @@ class CoreController extends KernelController
 
         $twig = new \Twig_Environment($this->twigLoader);
         $twig->addFunction($function);
+
+        //~ Add functions to twig
+        foreach ($this->twigFunctions as $name => $function) {
+            $twig->addFunction( new \Twig_SimpleFunction($name, $function));
+        }
+
+        //~ Add functions to twig
+        foreach ($this->twigFilters as $name => $function) {
+            $twig->addFilter( new \Twig_SimpleFilter($name, $function));
+        }
 
         return $twig->render($template, $this->getContext());
     }
