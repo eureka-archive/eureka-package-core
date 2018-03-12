@@ -184,7 +184,7 @@ class CoreController extends KernelController
      */
     protected function render($template, $context = [])
     {
-        $routes   = $this->getContainer()->get('routes');
+        $routes   = $this->getContainer()->get('router');
         $function = new \Twig_SimpleFunction('uri', function ($routeName, $params = []) use ($routes) {
             return $routes->get($routeName)->getUri($params);
         });
