@@ -189,7 +189,15 @@ class CoreController extends KernelController
             return $routes->get($routeName)->getUri($params);
         });
 
-        $twig = new \Twig_Environment($this->twigLoader);
+        $options = [
+            'debug' => $this->getConfig()->get('app.twig.debug'),
+        ];
+
+        if ($this->getConfig()->get('app.twig.cache.enabled')) {
+            $options['cache'] = $this->getConfig()->get('app.twig.cache.path');
+        }
+
+        $twig = new \Twig_Environment($this->twigLoader, ['cache' => $this->getConfig()->get('app.twig.cache.path')]);
         $twig->addFunction($function);
 
         //~ Add functions to twig
