@@ -14,8 +14,7 @@
 
   "autoload": {
     "psr-4": {
-      "Eureka\\Package\\Core\\Component\\": "./src/components",
-      "Eureka\\Package\\Core\\Controller\\": "./src/controllers"
+      "Eureka\\Package\\Core\\": "./src"
     }
   },
 

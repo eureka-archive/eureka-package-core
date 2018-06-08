@@ -1,11 +1,11 @@
-{% extends '@template/Content/PageHome.twig' %}
+{% extends '@common/Content/Page.twig' %}
 
-{% import '@template/Macro/Card/CardBackground.twig' as CardBackground %}
-{% import '@template/Macro/Card/CardBorder.twig' as CardBorder %}
+{% import '@macro/Card/CardBackground.twig' as CardBackground %}
+{% import '@macro/Card/CardBorder.twig' as CardBorder %}
 
 
-{% use '@template/Header/Navbar.twig' %}
-{% use '@template/Footer/Footer.twig' %}
+{% use '@common/Header/Navbar.twig' %}
+{% use '@common/Footer/Footer.twig' %}
 
 {% block header_navbar_name %}{{ meta.title }}{% endblock %}
 

@@ -26,15 +26,6 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class CoreController extends KernelController
 {
-    /** @var \Twig_Loader_Filesystem $twigLoader */
-    private $twigLoader = null;
-
-    /** @var callable[] $twigFunctions */
-    private $twigFunctions = [];
-
-    /** @var callable[] $twigFilters */
-    private $twigFilters = [];
-
     /**
      * CoreController constructor.
      *
@@ -42,7 +33,6 @@ class CoreController extends KernelController
      * @param \Eureka\Component\Config\Config $config
      * @param \Eureka\Component\Routing\RouteInterface $route
      * @param \Psr\Http\Message\ServerRequestInterface|null $request
-     * @throws \Twig_Error_Loader
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \Psr\Container\ContainerExceptionInterface
      */
@@ -51,7 +41,6 @@ class CoreController extends KernelController
         parent::__construct($container, $config, $route, $request);
 
         $this
-            ->initTwig()
             ->initMenu()
             ->initMeta()
             ->initTheme()
@@ -60,56 +49,34 @@ class CoreController extends KernelController
 
     /**
      * @return $this
-     * @throws \Twig_Error_Loader
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     * @throws \Psr\Container\ContainerExceptionInterface
-     */
-    private function initTwig()
-    {
-        $this->twigLoader = $this->getContainer()->get('twig.loader');
-        $this->twigLoader->addPath($this->config->get('app.twig.theme.layout'), 'layout');
-        $this->twigLoader->addPath($this->config->get('app.twig.theme.template'), 'template');
-        $this->twigLoader->addPath($this->config->get('app.twig.home.template'), 'home');
-
-        return $this;
-    }
-
-    /**
-     * @return \Twig_Loader_Filesystem
-     */
-    protected function getTwigLoader()
-    {
-        return $this->twigLoader;
-    }
-
-
-    /**
-     * @return $this
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \Psr\Container\ContainerExceptionInterface
      */
     protected function initMenu()
     {
+        $currentRoute = $this->getCurrentRoute();
         $config = $this->getConfig()->get('app.menu');
 
         $menu = new Menu();
         foreach ($config as $data) {
+            $routeUri = isset($data['route']) ? $this->getRoute($data['route'])->getUri() : '#';
             $item = new MenuItem($data['label']);
             $item
-                ->setUri($this->getRoute(Helper::issetget($data['route'], '#'))->getUri())
+                ->setUri($routeUri)
                 ->setIcon(Helper::issetget($data['icon']))
                 ->setIsActive(true)
             ;
 
-            if (!empty($data['submenu'])) {
+            if (!empty($data['children'])) {
                 $submenu = new Menu();
-                foreach ($data['submenu'] as $subData) {
+                foreach ($data['children'] as $subData) {
+                    $routeUri   = isset($data['route']) ? $this->getRoute($data['route'])->getUri() : '#';
                     $subItem = new MenuItem($subData['label']);
                     $subItem
                         ->setIsDivider((bool) Helper::issetget($subData['divider'], false))
-                        ->setUri($this->getRoute(Helper::issetget($subData['route'], '#'))->getUri())
+                        ->setUri($routeUri)
                         ->setIcon(Helper::issetget($subData['icon']))
-                        ->setIsActive(true)
+                        ->setIsActive($currentRoute->getUri() === $routeUri)
                     ;
                     $submenu->add($subItem);
                 }
@@ -149,30 +116,6 @@ class CoreController extends KernelController
     }
 
     /**
-     * @param  string $name
-     * @param  callable $callable
-     * @return $this
-     */
-    protected function addTwigFunction($name, callable $callable)
-    {
-        $this->twigFunctions[$name] = $callable;
-
-        return $this;
-    }
-
-    /**
-     * @param  string $name
-     * @param  callable $callable
-     * @return $this
-     */
-    protected function addTwigFilter($name, callable $callable)
-    {
-        $this->twigFilters[$name] = $callable;
-
-        return $this;
-    }
-
-    /**
      * @param  string $template
      * @param  array $context
      * @return string
@@ -184,31 +127,9 @@ class CoreController extends KernelController
      */
     protected function render($template, $context = [])
     {
-        $routes   = $this->getContainer()->get('router');
-        $function = new \Twig_SimpleFunction('uri', function ($routeName, $params = []) use ($routes) {
-            return $routes->get($routeName)->getUri($params);
-        });
-
-        $options = [
-            'debug' => $this->getConfig()->get('app.twig.debug'),
-        ];
-
-        if ($this->getConfig()->get('app.twig.cache.enabled')) {
-            $options['cache'] = $this->getConfig()->get('app.twig.cache.path');
-        }
-
-        $twig = new \Twig_Environment($this->twigLoader, ['cache' => $this->getConfig()->get('app.twig.cache.path')]);
-        $twig->addFunction($function);
-
-        //~ Add functions to twig
-        foreach ($this->twigFunctions as $name => $function) {
-            $twig->addFunction( new \Twig_SimpleFunction($name, $function));
-        }
-
-        //~ Add functions to twig
-        foreach ($this->twigFilters as $name => $function) {
-            $twig->addFilter( new \Twig_SimpleFilter($name, $function));
-        }
+        /** @var \Eureka\Package\Core\Component\Twig\Twig $twigService */
+        $twigService = $this->getContainer()->get('twig.service');
+        $twig = $twigService->getEnvironment();
 
         return $twig->render($template, $this->getContext());
     }

@@ -1,0 +1,32 @@
+{% extends '@template/Content/Page.twig' %}
+
+{% import '@template/Macro/Card/CardBackground.twig' as CardBackground %}
+{% import '@template/Macro/Card/CardBorder.twig' as CardBorder %}
+
+
+{% use '@template/Header/Navbar.twig' %}
+{% use '@template/Footer/Footer.twig' %}
+
+{% block header_navbar_name %}{{ meta.title }}{% endblock %}
+
+{% block content %}
+
+    <h1>Welcome Dynamic Page!</h1>
+
+    {% if pageCarousel %}
+        <h3>PAGE.CAROUSEL</h3>
+        {{ pageCarousel }}
+    {% endif %}
+
+    {% if pageMenu %}
+        <h3>PAGE.MENU</h3>
+        {{ pageMenu }}
+    {% endif %}
+
+    <h3>PAGE.CONTENT</h3>
+    {{ pageContent }}
+
+{% endblock %}
+
+{% block side_right %}
+{% endblock %}

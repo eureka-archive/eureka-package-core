@@ -13,11 +13,8 @@ all:
     route: /
     controller: \Eureka\Package\Core\Controller\Home::index
 
-
-  page404:
-    route: /page404
-    controller: \Eureka\Package\Core\Controller\Error::page404
-
-  page500:
-    route: /page500
-    controller: \Eureka\Package\Core\Controller\Error::page500
+  page:
+    route: /page/:page_name
+    controller: \Eureka\Package\Core\Controller\Page::dynamic
+    required:
+      page_name: string

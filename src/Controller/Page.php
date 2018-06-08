@@ -9,22 +9,27 @@
 
 namespace Eureka\Package\Core\Controller;
 
-use Eureka\Kernel\Http\Controller\Controller;
-use Eureka\Component\Http\Message\Response;
 use Eureka\Package\Core\Component\Controller\CoreController;
 use Psr\Http\Message\RequestInterface;
 
-class Home extends CoreController
+class Page extends CoreController
 {
     /**
      * @param \Psr\Http\Message\RequestInterface $request
      * @return \Eureka\Component\Http\Message\Response
+     * @throws \Eureka\Component\Routing\Exception\ParameterException
      * @throws \Twig_Error_Loader
      * @throws \Twig_Error_Runtime
      * @throws \Twig_Error_Syntax
      */
-    public function index(RequestInterface $request)
+    public function dynamic(RequestInterface $request)
     {
-        return $this->getResponse($this->render('@home/Home.twig', ['menu' => []]));
+        $pageName = $this->getParameter('page_name');
+
+        $this->addContext('pageContent', $pageName);
+        $this->addContext('pageCarousel', '');
+        $this->addContext('pageMenu', '');
+
+        return $this->getResponse($this->render('@home/Dynamic.twig'));
     }
 }

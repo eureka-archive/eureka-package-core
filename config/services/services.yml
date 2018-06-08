@@ -1,0 +1,27 @@
+##
+# Copyright (c) Romain Cottard
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code.
+#
+#  # Class added in container in index.php
+#  config:
+#    class: \Eureka\Component\Config\Config
+##
+
+all:
+
+  twig.loader:
+    class: \Twig_Loader_Filesystem
+
+  twig.helper:
+    class: \Eureka\Package\Core\Component\Twig\TwigHelper
+    params:
+      - "@router"
+
+  twig.service:
+    class: \Eureka\Package\Core\Component\Twig\Twig
+    params:
+      - "@twig.loader"
+      - "@twig.helper"
+      - "%app.twig%"
